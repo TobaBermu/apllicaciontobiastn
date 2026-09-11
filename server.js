@@ -57,6 +57,22 @@ app.post("/api/popups", requireAdmin, (req, res) => {
     cta_url: p.cta_url || "",
     show_once_per_session: !!p.show_once_per_session,
     active: p.active !== false,
+    design_mode: p.design_mode || "simple",
+    position: p.position || "center",
+    width: Number(p.width) || 420,
+    border_radius: p.border_radius != null ? Number(p.border_radius) : 12,
+    bg_color: p.bg_color || "#ffffff",
+    title_color: p.title_color || "#111111",
+    text_color: p.text_color || "#444444",
+    button_bg_color: p.button_bg_color || "#111111",
+    button_text_color: p.button_text_color || "#ffffff",
+    font_family: p.font_family || "system",
+    title_font_size: Number(p.title_font_size) || 20,
+    text_font_size: Number(p.text_font_size) || 14,
+    animation: p.animation || "fade",
+    custom_html: p.custom_html || "",
+    custom_css: p.custom_css || "",
+    custom_js: p.custom_js || "",
   });
   res.status(201).json(created);
 });
@@ -71,10 +87,17 @@ app.put("/api/popups/:id", requireAdmin, (req, res) => {
   [
     "name", "keyword", "match_type", "title", "message",
     "image_url", "cta_text", "cta_url",
+    "design_mode", "position", "bg_color", "title_color", "text_color",
+    "button_bg_color", "button_text_color", "font_family", "animation",
+    "custom_html", "custom_css", "custom_js",
   ].forEach((key) => {
     if (p[key] !== undefined) patch[key] = p[key];
   });
   if (p.delay_seconds !== undefined) patch.delay_seconds = Number(p.delay_seconds) || 0;
+  if (p.width !== undefined) patch.width = Number(p.width) || 420;
+  if (p.border_radius !== undefined) patch.border_radius = Number(p.border_radius) || 0;
+  if (p.title_font_size !== undefined) patch.title_font_size = Number(p.title_font_size) || 20;
+  if (p.text_font_size !== undefined) patch.text_font_size = Number(p.text_font_size) || 14;
   if (p.show_once_per_session !== undefined) patch.show_once_per_session = !!p.show_once_per_session;
   if (p.active !== undefined) patch.active = !!p.active;
 
@@ -102,48 +125,24 @@ app.get("/api/popups/active", (req, res) => {
     cta_text: r.cta_text,
     cta_url: r.cta_url,
     show_once_per_session: !!r.show_once_per_session,
+    design_mode: r.design_mode || "simple",
+    position: r.position || "center",
+    width: r.width || 420,
+    border_radius: r.border_radius != null ? r.border_radius : 12,
+    bg_color: r.bg_color || "#ffffff",
+    title_color: r.title_color || "#111111",
+    text_color: r.text_color || "#444444",
+    button_bg_color: r.button_bg_color || "#111111",
+    button_text_color: r.button_text_color || "#ffffff",
+    font_family: r.font_family || "system",
+    title_font_size: r.title_font_size || 20,
+    text_font_size: r.text_font_size || 14,
+    animation: r.animation || "fade",
+    custom_html: r.custom_html || "",
+    custom_css: r.custom_css || "",
+    custom_js: r.custom_js || "",
   }));
   res.json(publicRows);
-});
-
-// ---------- Registrar el script en Tienda Nube (Script Tags API) ----------
-app.post("/api/tiendanube/register-script", requireAdmin, async (req, res) => {
-  const storeId = req.body?.store_id || TN_STORE_ID;
-  const accessToken = req.body?.access_token || TN_ACCESS_TOKEN;
-  const backendUrl = req.body?.backend_url || PUBLIC_BACKEND_URL;
-
-  if (!storeId || !accessToken) {
-    return res.status(400).json({ error: "Falta store_id o access_token (definilos en .env o en el body)" });
-  }
-  if (!backendUrl) {
-    return res.status(400).json({ error: "Falta PUBLIC_BACKEND_URL para saber dónde está alojado el widget" });
-  }
-
-  const scriptUrl = `${backendUrl.replace(/\/$/, "")}/widget/popup.js`;
-
-  try {
-    const response = await fetch(`https://api.tiendanube.com/v1/${storeId}/scripts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authentication: `bearer ${accessToken}`,
-        "User-Agent": "TiendaNube Popup App (contacto@tudominio.com)",
-      },
-      body: JSON.stringify({
-        src: scriptUrl,
-        event: "onload",
-        where: "storefront",
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      return res.status(response.status).json({ error: "Error de la API de Tienda Nube", detail: data });
-    }
-    res.json({ ok: true, script: data });
-  } catch (err) {
-    res.status(500).json({ error: "Error al registrar el script", detail: String(err) });
-  }
 });
 
 // ---------- Servir el widget público (JS que se inyecta en la tienda) ----------

@@ -163,10 +163,20 @@ app.post("/api/tiendanube/register-script", requireAdmin, async (req, res) => {
 });
 
 // ---------- Servir el widget público (JS que se inyecta en la tienda) ----------
-app.use("/widget", express.static(path.join(__dirname, "..", "widget")));
+app.get("/widget/popup.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "popup.js"));
+});
 
 // ---------- Servir el panel de admin (estático) ----------
-app.use("/admin", express.static(path.join(__dirname, "public", "admin")));
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+app.get("/style.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "style.css"));
+});
+app.get("/app.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "app.js"));
+});
 
 app.get("/", (req, res) => {
   res.send('Backend de Pop-ups OK. Panel de admin en <a href="/admin">/admin</a>');

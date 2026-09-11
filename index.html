@@ -22,12 +22,16 @@
   <header class="topbar">
     <h1>Pop-ups</h1>
     <div>
-      <button id="register-script-btn" class="btn secondary">Registrar script en Tienda Nube</button>
       <button id="new-popup-btn" class="btn primary">+ Nuevo pop-up</button>
     </div>
   </header>
 
-  <p id="register-msg" class="msg"></p>
+  <p class="msg">
+    Para activar los pop-ups en tu tienda, pegá este script en
+    <b>Tienda Nube → Configuración → Códigos de tracking → "Para la tienda"</b>:
+    <br />
+    <code id="script-tag-snippet">&lt;script src="URL_DE_TU_BACKEND/widget/popup.js"&gt;&lt;/script&gt;</code>
+  </p>
 
   <div id="popup-list" class="list"></div>
 </div>
@@ -87,6 +91,106 @@
         <input id="f-active" type="checkbox" checked />
         Activo
       </label>
+
+      <hr class="divider" />
+      <h3 class="section-title">Diseño</h3>
+
+      <label>Modo de diseño
+        <select id="f-design-mode">
+          <option value="simple">Simple (controles del panel)</option>
+          <option value="custom">Código personalizado (HTML/CSS/JS)</option>
+        </select>
+      </label>
+
+      <div id="simple-design-fields">
+        <label>Posición en pantalla
+          <select id="f-position">
+            <option value="center">Centro (con fondo oscuro)</option>
+            <option value="top">Arriba (con fondo oscuro)</option>
+            <option value="bottom">Abajo (con fondo oscuro)</option>
+            <option value="top-left">Esquina superior izquierda</option>
+            <option value="top-right">Esquina superior derecha</option>
+            <option value="bottom-left">Esquina inferior izquierda</option>
+            <option value="bottom-right">Esquina inferior derecha</option>
+          </select>
+        </label>
+
+        <label>Ancho del pop-up (px)
+          <input id="f-width" type="number" min="200" max="800" value="420" />
+        </label>
+
+        <label>Bordes redondeados (px)
+          <input id="f-border-radius" type="number" min="0" max="40" value="12" />
+        </label>
+
+        <div class="row-2">
+          <label>Color de fondo
+            <input id="f-bg-color" type="color" value="#ffffff" />
+          </label>
+          <label>Color del título
+            <input id="f-title-color" type="color" value="#111111" />
+          </label>
+        </div>
+
+        <div class="row-2">
+          <label>Color del texto
+            <input id="f-text-color" type="color" value="#444444" />
+          </label>
+          <label>Color de fondo del botón
+            <input id="f-button-bg-color" type="color" value="#111111" />
+          </label>
+        </div>
+
+        <label>Color del texto del botón
+          <input id="f-button-text-color" type="color" value="#ffffff" />
+        </label>
+
+        <label>Tipografía
+          <select id="f-font-family">
+            <option value="system">Predeterminada (del sistema)</option>
+            <option value="serif">Serif (elegante)</option>
+            <option value="rounded">Redondeada (amigable)</option>
+            <option value="monospace">Monoespaciada (técnica)</option>
+          </select>
+        </label>
+
+        <div class="row-2">
+          <label>Tamaño del título (px)
+            <input id="f-title-font-size" type="number" min="10" max="48" value="20" />
+          </label>
+          <label>Tamaño del texto (px)
+            <input id="f-text-font-size" type="number" min="10" max="28" value="14" />
+          </label>
+        </div>
+
+        <label>Animación de entrada
+          <select id="f-animation">
+            <option value="fade">Aparecer suave</option>
+            <option value="slide-up">Deslizar desde abajo</option>
+            <option value="slide-down">Deslizar desde arriba</option>
+            <option value="zoom">Zoom</option>
+            <option value="none">Sin animación</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="custom-design-fields" class="hidden">
+        <p class="muted">
+          Se ignoran los campos de Título/Mensaje/Imagen/Botón de arriba y los controles de diseño simple.
+          El HTML de abajo se inserta directo dentro de la caja del pop-up.
+          Podés usar <code>{title}</code>, <code>{message}</code>, <code>{image_url}</code>, <code>{cta_text}</code>, <code>{cta_url}</code>
+          como marcadores que se reemplazan por los valores cargados arriba.
+        </p>
+        <label>HTML personalizado
+          <textarea id="f-custom-html" rows="6" placeholder="&lt;h2&gt;{title}&lt;/h2&gt;&lt;p&gt;{message}&lt;/p&gt;"></textarea>
+        </label>
+        <label>CSS personalizado
+          <textarea id="f-custom-css" rows="6" placeholder=".mi-popup h2 { color: red; }"></textarea>
+        </label>
+        <label>JavaScript personalizado (opcional, se ejecuta al mostrar el pop-up)
+          <textarea id="f-custom-js" rows="4" placeholder="// popupEl = la caja del pop-up&#10;// popup = los datos del pop-up"></textarea>
+        </label>
+      </div>
 
       <div class="modal-actions">
         <button type="button" id="cancel-btn" class="btn">Cancelar</button>

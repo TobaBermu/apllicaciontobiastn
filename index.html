@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin de Pop-ups · Tienda Nube</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="login-screen" class="screen">
+  <div class="card login-card">
+    <h1>Panel de Pop-ups</h1>
+    <p class="muted">Ingresá la contraseña de administrador</p>
+    <input id="login-password" type="password" placeholder="Contraseña" />
+    <button id="login-btn" class="btn primary">Entrar</button>
+    <p id="login-error" class="error"></p>
+  </div>
+</div>
+
+<div id="app-screen" class="screen hidden">
+  <header class="topbar">
+    <h1>Pop-ups</h1>
+    <div>
+      <button id="register-script-btn" class="btn secondary">Registrar script en Tienda Nube</button>
+      <button id="new-popup-btn" class="btn primary">+ Nuevo pop-up</button>
+    </div>
+  </header>
+
+  <p id="register-msg" class="msg"></p>
+
+  <div id="popup-list" class="list"></div>
+</div>
+
+<div id="form-modal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="form-title">Nuevo pop-up</h2>
+    <form id="popup-form">
+      <input type="hidden" id="popup-id" />
+
+      <label>Nombre interno
+        <input id="f-name" type="text" placeholder="Ej: Promo Black Friday" required />
+      </label>
+
+      <label>Palabra o texto que debe contener la URL
+        <input id="f-keyword" type="text" placeholder="Ej: black-friday" required />
+      </label>
+
+      <label>Tipo de coincidencia
+        <select id="f-match-type">
+          <option value="contains">Contiene la palabra</option>
+          <option value="equals">Es exactamente igual</option>
+          <option value="starts_with">Empieza con</option>
+        </select>
+      </label>
+
+      <label>Segundos de espera antes de mostrar
+        <input id="f-delay" type="number" min="0" value="3" />
+      </label>
+
+      <label>Título
+        <input id="f-title" type="text" placeholder="Ej: ¡20% OFF hoy!" />
+      </label>
+
+      <label>Mensaje
+        <textarea id="f-message" rows="3" placeholder="Texto del pop-up"></textarea>
+      </label>
+
+      <label>URL de imagen (opcional)
+        <input id="f-image" type="url" placeholder="https://..." />
+      </label>
+
+      <label>Texto del botón (opcional)
+        <input id="f-cta-text" type="text" placeholder="Ej: Ver oferta" />
+      </label>
+
+      <label>URL del botón (opcional)
+        <input id="f-cta-url" type="url" placeholder="https://..." />
+      </label>
+
+      <label class="checkbox-label">
+        <input id="f-once" type="checkbox" checked />
+        Mostrar solo una vez por sesión
+      </label>
+
+      <label class="checkbox-label">
+        <input id="f-active" type="checkbox" checked />
+        Activo
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="cancel-btn" class="btn">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -27,11 +27,13 @@
   </header>
 
   <p class="msg">
-    Para activar los pop-ups en tu tienda, pegá este script en
-    <b>Tienda Nube → Configuración → Códigos de tracking → "Para la tienda"</b>:
-    <br />
-    <code id="script-tag-snippet">&lt;script src="URL_DE_TU_BACKEND/widget/popup.js"&gt;&lt;/script&gt;</code>
+    Para activar los pop-ups en tu tienda, agregá este script como una <b>Etiqueta HTML personalizada</b>
+    en <b>Google Tag Manager</b> (disparador: Todas las páginas):
   </p>
+  <div class="snippet-row">
+    <code id="script-tag-snippet">&lt;script src="URL_DE_TU_BACKEND/widget/popup.js"&gt;&lt;/script&gt;</code>
+    <button id="copy-snippet-btn" class="btn" type="button">Copiar</button>
+  </div>
 
   <div id="popup-list" class="list"></div>
 </div>
@@ -46,21 +48,43 @@
         <input id="f-name" type="text" placeholder="Ej: Promo Black Friday" required />
       </label>
 
-      <label>Palabra o texto que debe contener la URL
-        <input id="f-keyword" type="text" placeholder="Ej: black-friday" required />
-      </label>
-
-      <label>Tipo de coincidencia
-        <select id="f-match-type">
-          <option value="contains">Contiene la palabra</option>
-          <option value="equals">Es exactamente igual</option>
-          <option value="starts_with">Empieza con</option>
+      <label>¿Cuándo se dispara?
+        <select id="f-trigger-type">
+          <option value="url">Cuando la URL contiene una palabra</option>
+          <option value="click">Cuando el usuario hace clic en un botón/texto</option>
         </select>
       </label>
 
-      <label>Segundos de espera antes de mostrar
-        <input id="f-delay" type="number" min="0" value="3" />
-      </label>
+      <div id="url-trigger-fields">
+        <label>Palabra o texto que debe contener la URL
+          <input id="f-keyword" type="text" placeholder="Ej: black-friday" />
+        </label>
+
+        <label>Tipo de coincidencia
+          <select id="f-match-type">
+            <option value="contains">Contiene la palabra</option>
+            <option value="equals">Es exactamente igual</option>
+            <option value="starts_with">Empieza con</option>
+          </select>
+        </label>
+
+        <label>Segundos de espera antes de mostrar
+          <input id="f-delay" type="number" min="0" value="3" />
+        </label>
+      </div>
+
+      <div id="click-trigger-fields" class="hidden">
+        <label>Texto del botón o link a detectar
+          <input id="f-click-text" type="text" placeholder="Ej: Iniciar compra" />
+        </label>
+        <p class="muted">
+          El pop-up se muestra apenas el usuario hace clic en cualquier botón o link cuyo texto contenga esto (sin importar mayúsculas).
+          Al cerrar el pop-up, la acción original continúa normalmente (ej: sigue al checkout).
+        </p>
+        <label>Restringir a páginas cuya URL contenga (opcional)
+          <input id="f-click-url-restrict" type="text" placeholder="Ej: carrito (dejar vacío = cualquier página)" />
+        </label>
+      </div>
 
       <label>Título
         <input id="f-title" type="text" placeholder="Ej: ¡20% OFF hoy!" />
@@ -102,27 +126,38 @@
         </select>
       </label>
 
-      <div id="simple-design-fields">
-        <label>Posición en pantalla
-          <select id="f-position">
-            <option value="center">Centro (con fondo oscuro)</option>
-            <option value="top">Arriba (con fondo oscuro)</option>
-            <option value="bottom">Abajo (con fondo oscuro)</option>
-            <option value="top-left">Esquina superior izquierda</option>
-            <option value="top-right">Esquina superior derecha</option>
-            <option value="bottom-left">Esquina inferior izquierda</option>
-            <option value="bottom-right">Esquina inferior derecha</option>
-          </select>
-        </label>
+      <label>Posición en pantalla
+        <select id="f-position">
+          <option value="center">Centro (con fondo oscuro)</option>
+          <option value="top">Arriba (con fondo oscuro)</option>
+          <option value="bottom">Abajo (con fondo oscuro)</option>
+          <option value="top-left">Esquina superior izquierda</option>
+          <option value="top-right">Esquina superior derecha</option>
+          <option value="bottom-left">Esquina inferior izquierda</option>
+          <option value="bottom-right">Esquina inferior derecha</option>
+        </select>
+      </label>
 
+      <div class="row-2">
         <label>Ancho del pop-up (px)
           <input id="f-width" type="number" min="200" max="800" value="420" />
         </label>
-
         <label>Bordes redondeados (px)
           <input id="f-border-radius" type="number" min="0" max="40" value="12" />
         </label>
+      </div>
 
+      <label>Animación de entrada
+        <select id="f-animation">
+          <option value="fade">Aparecer suave</option>
+          <option value="slide-up">Deslizar desde abajo</option>
+          <option value="slide-down">Deslizar desde arriba</option>
+          <option value="zoom">Zoom</option>
+          <option value="none">Sin animación</option>
+        </select>
+      </label>
+
+      <div id="simple-design-fields">
         <div class="row-2">
           <label>Color de fondo
             <input id="f-bg-color" type="color" value="#ffffff" />
@@ -162,24 +197,14 @@
             <input id="f-text-font-size" type="number" min="10" max="28" value="14" />
           </label>
         </div>
-
-        <label>Animación de entrada
-          <select id="f-animation">
-            <option value="fade">Aparecer suave</option>
-            <option value="slide-up">Deslizar desde abajo</option>
-            <option value="slide-down">Deslizar desde arriba</option>
-            <option value="zoom">Zoom</option>
-            <option value="none">Sin animación</option>
-          </select>
-        </label>
       </div>
 
       <div id="custom-design-fields" class="hidden">
         <p class="muted">
-          Se ignoran los campos de Título/Mensaje/Imagen/Botón de arriba y los controles de diseño simple.
-          El HTML de abajo se inserta directo dentro de la caja del pop-up.
+          Se ignora el renderizado automático de Título/Mensaje/Imagen/Botón y los colores/tipografía de arriba.
+          El HTML de abajo se inserta directo dentro de la caja del pop-up (la posición, ancho, bordes y animación de arriba sí se siguen aplicando).
           Podés usar <code>{title}</code>, <code>{message}</code>, <code>{image_url}</code>, <code>{cta_text}</code>, <code>{cta_url}</code>
-          como marcadores que se reemplazan por los valores cargados arriba.
+          como marcadores que se reemplazan por los valores cargados en los campos Título/Mensaje/Imagen/Botón de más arriba.
         </p>
         <label>HTML personalizado
           <textarea id="f-custom-html" rows="6" placeholder="&lt;h2&gt;{title}&lt;/h2&gt;&lt;p&gt;{message}&lt;/p&gt;"></textarea>
@@ -193,13 +218,18 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" id="cancel-btn" class="btn">Cancelar</button>
-        <button type="submit" class="btn primary">Guardar</button>
+        <button type="button" id="preview-btn" class="btn secondary">👁 Vista previa</button>
+        <div>
+          <button type="button" id="cancel-btn" class="btn">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
       </div>
     </form>
   </div>
 </div>
 
+<script>window.TN_POPUP_DISABLE_AUTO_INIT = true;</script>
+<script src="/widget/popup.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

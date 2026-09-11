@@ -31,6 +31,20 @@
     }
   }
 
+  var triggerTypeSelect = document.getElementById("f-trigger-type");
+  var urlTriggerFields = document.getElementById("url-trigger-fields");
+  var clickTriggerFields = document.getElementById("click-trigger-fields");
+  triggerTypeSelect.addEventListener("change", updateTriggerVisibility);
+  function updateTriggerVisibility() {
+    if (triggerTypeSelect.value === "click") {
+      urlTriggerFields.classList.add("hidden");
+      clickTriggerFields.classList.remove("hidden");
+    } else {
+      urlTriggerFields.classList.remove("hidden");
+      clickTriggerFields.classList.add("hidden");
+    }
+  }
+
   function authHeaders() {
     return { Authorization: "Bearer " + token, "Content-Type": "application/json" };
   }
@@ -98,10 +112,15 @@
     popups.forEach(function (p) {
       var card = document.createElement("div");
       card.className = "popup-card";
+      var triggerLine = p.trigger_type === "click"
+        ? "Clic en: <b>" + escapeHtml(p.click_text || "") + "</b>"
+        : "URL " + matchLabel(p.match_type) + ": <b>" + escapeHtml(p.keyword) + "</b>";
       card.innerHTML =
         "<h3>" + escapeHtml(p.name) + "</h3>" +
-        '<p class="meta">URL ' + matchLabel(p.match_type) + ': <b>' + escapeHtml(p.keyword) + "</b></p>" +
-        '<p class="meta">Espera: ' + p.delay_seconds + "s</p>" +
+        '<p class="meta">' + triggerLine + "</p>" +
+        (p.trigger_type === "click"
+          ? ""
+          : '<p class="meta">Espera: ' + p.delay_seconds + "s</p>") +
         '<span class="badge ' + (p.active ? "active" : "inactive") + '">' +
         (p.active ? "Activo" : "Inactivo") + "</span>" +
         '<div class="actions">' +
@@ -149,6 +168,10 @@
     document.getElementById("f-keyword").value = popup ? popup.keyword : "";
     document.getElementById("f-match-type").value = popup ? popup.match_type : "contains";
     document.getElementById("f-delay").value = popup ? popup.delay_seconds : 3;
+    triggerTypeSelect.value = (popup && popup.trigger_type) || "url";
+    document.getElementById("f-click-text").value = (popup && popup.click_text) || "";
+    document.getElementById("f-click-url-restrict").value = (popup && popup.click_url_restrict) || "";
+    updateTriggerVisibility();
     document.getElementById("f-title").value = popup ? popup.title : "";
     document.getElementById("f-message").value = popup ? popup.message : "";
     document.getElementById("f-image").value = popup ? popup.image_url : "";
@@ -183,14 +206,15 @@
     popupForm.reset();
   }
 
-  popupForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var id = document.getElementById("popup-id").value;
-    var payload = {
+  function collectFormData() {
+    return {
       name: document.getElementById("f-name").value,
       keyword: document.getElementById("f-keyword").value,
       match_type: document.getElementById("f-match-type").value,
       delay_seconds: Number(document.getElementById("f-delay").value) || 0,
+      trigger_type: triggerTypeSelect.value,
+      click_text: document.getElementById("f-click-text").value,
+      click_url_restrict: document.getElementById("f-click-url-restrict").value,
       title: document.getElementById("f-title").value,
       message: document.getElementById("f-message").value,
       image_url: document.getElementById("f-image").value,
@@ -215,6 +239,24 @@
       custom_css: document.getElementById("f-custom-css").value,
       custom_js: document.getElementById("f-custom-js").value,
     };
+  }
+
+  var previewBtn = document.getElementById("preview-btn");
+  previewBtn.addEventListener("click", function () {
+    if (!window.TNPopupWidget) {
+      alert("No se pudo cargar el widget de vista previa.");
+      return;
+    }
+    var data = collectFormData();
+    data.id = "preview-" + Date.now();
+    data.show_once_per_session = false; // la vista previa siempre debe mostrarse
+    window.TNPopupWidget.showPopup(data);
+  });
+
+  popupForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var id = document.getElementById("popup-id").value;
+    var payload = collectFormData();
 
     var req = id
       ? fetch(API + "/api/popups/" + id, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) })
@@ -261,10 +303,28 @@
 
   // ---- Mostrar el <script> tag listo para copiar, con la URL real de este backend ----
   var scriptSnippet = document.getElementById("script-tag-snippet");
+  var scriptText = "";
   if (scriptSnippet) {
     var backendUrl = window.location.origin;
-    scriptSnippet.textContent =
-      '<script src="' + backendUrl + '/widget/popup.js"><' + "/script>";
+    scriptText = '<script src="' + backendUrl + '/widget/popup.js"><' + "/script>";
+    scriptSnippet.textContent = scriptText;
+  }
+
+  var copyBtn = document.getElementById("copy-snippet-btn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      navigator.clipboard.writeText(scriptText).then(
+        function () {
+          copyBtn.textContent = "¡Copiado!";
+          setTimeout(function () {
+            copyBtn.textContent = "Copiar";
+          }, 1500);
+        },
+        function () {
+          alert("No se pudo copiar automáticamente. Seleccioná el texto a mano.");
+        }
+      );
+    });
   }
 
   // ---- init ----

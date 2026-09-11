@@ -59,6 +59,24 @@ body {
   font-size: 13px;
   color: var(--muted);
 }
+.snippet-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 32px 16px;
+  flex-wrap: wrap;
+}
+.snippet-row code {
+  background: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  word-break: break-all;
+}
+.snippet-row .btn {
+  margin-left: 0;
+  flex-shrink: 0;
+}
 
 /* Buttons */
 .btn {
@@ -151,6 +169,36 @@ body {
 .checkbox-label input { width: auto; }
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 20px;
+}
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0 10px;
+}
+.section-title {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.modal-box input[type=color] {
+  padding: 3px;
+  height: 38px;
+  cursor: pointer;
+}
+.modal-box textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+.modal-box code {
+  background: #f1f1f1;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
 }

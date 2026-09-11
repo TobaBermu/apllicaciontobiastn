@@ -40,18 +40,12 @@ app.post("/api/login", (req, res) => {
 
 // ---------- CRUD de pop-ups (protegido) ----------
 app.get("/api/popups", requireAdmin, (req, res) => {
-  const rows = db.prepare("SELECT * FROM popups ORDER BY id DESC").all();
-  res.json(rows);
+  res.json(db.getAll());
 });
 
 app.post("/api/popups", requireAdmin, (req, res) => {
   const p = req.body || {};
-  const stmt = db.prepare(`
-    INSERT INTO popups
-      (name, keyword, match_type, delay_seconds, title, message, image_url, cta_text, cta_url, show_once_per_session, active)
-    VALUES (@name, @keyword, @match_type, @delay_seconds, @title, @message, @image_url, @cta_text, @cta_url, @show_once_per_session, @active)
-  `);
-  const info = stmt.run({
+  const created = db.create({
     name: p.name || "Sin nombre",
     keyword: p.keyword || "",
     match_type: p.match_type || "contains",
@@ -61,51 +55,41 @@ app.post("/api/popups", requireAdmin, (req, res) => {
     image_url: p.image_url || "",
     cta_text: p.cta_text || "",
     cta_url: p.cta_url || "",
-    show_once_per_session: p.show_once_per_session ? 1 : 0,
-    active: p.active === false ? 0 : 1,
+    show_once_per_session: !!p.show_once_per_session,
+    active: p.active !== false,
   });
-  const created = db.prepare("SELECT * FROM popups WHERE id = ?").get(info.lastInsertRowid);
   res.status(201).json(created);
 });
 
 app.put("/api/popups/:id", requireAdmin, (req, res) => {
   const { id } = req.params;
-  const existing = db.prepare("SELECT * FROM popups WHERE id = ?").get(id);
+  const existing = db.getById(id);
   if (!existing) return res.status(404).json({ error: "No encontrado" });
 
-  const p = { ...existing, ...req.body };
-  db.prepare(`
-    UPDATE popups SET
-      name=@name, keyword=@keyword, match_type=@match_type, delay_seconds=@delay_seconds,
-      title=@title, message=@message, image_url=@image_url, cta_text=@cta_text, cta_url=@cta_url,
-      show_once_per_session=@show_once_per_session, active=@active
-    WHERE id=@id
-  `).run({
-    id,
-    name: p.name,
-    keyword: p.keyword,
-    match_type: p.match_type,
-    delay_seconds: Number(p.delay_seconds) || 0,
-    title: p.title,
-    message: p.message,
-    image_url: p.image_url,
-    cta_text: p.cta_text,
-    cta_url: p.cta_url,
-    show_once_per_session: p.show_once_per_session ? 1 : 0,
-    active: p.active ? 1 : 0,
+  const p = req.body || {};
+  const patch = {};
+  [
+    "name", "keyword", "match_type", "title", "message",
+    "image_url", "cta_text", "cta_url",
+  ].forEach((key) => {
+    if (p[key] !== undefined) patch[key] = p[key];
   });
-  const updated = db.prepare("SELECT * FROM popups WHERE id = ?").get(id);
+  if (p.delay_seconds !== undefined) patch.delay_seconds = Number(p.delay_seconds) || 0;
+  if (p.show_once_per_session !== undefined) patch.show_once_per_session = !!p.show_once_per_session;
+  if (p.active !== undefined) patch.active = !!p.active;
+
+  const updated = db.update(id, patch);
   res.json(updated);
 });
 
 app.delete("/api/popups/:id", requireAdmin, (req, res) => {
-  db.prepare("DELETE FROM popups WHERE id = ?").run(req.params.id);
+  db.remove(req.params.id);
   res.status(204).end();
 });
 
 // ---------- Endpoint público que consulta el widget ----------
 app.get("/api/popups/active", (req, res) => {
-  const rows = db.prepare("SELECT * FROM popups WHERE active = 1").all();
+  const rows = db.getActive();
   // Solo exponemos los campos necesarios para el front público
   const publicRows = rows.map((r) => ({
     id: r.id,
